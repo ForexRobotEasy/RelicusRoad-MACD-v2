@@ -1,0 +1,62 @@
+
+// RelicusRoad MACD v2
+// Developer's Site: forexroboteasy.com
+// Developer: Forex Robot Easy Team
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <MovingAverages\MovingAverages.mqh>
+
+// Define constants
+#define SCALPING_ARROW_THRESHOLD 0.001 // Threshold for Scalping Arrows feature
+#define REVERSAL_ARROW_THRESHOLD 0.005 // Threshold for Reversal Arrows feature
+
+// Create an instance of CTrade class
+CTrade trade;
+
+// Create an instance of CMovingAverages class
+CMovingAverages ma;
+
+// Initialize the trading robot
+int OnInit()
+{
+    // Set the necessary parameters for the trading robot
+    trade.SetExpertMagicNumber(123456); // Set magic number for trades
+    trade.SetExpertStopLoss(100); // Set stop loss level for trades
+    trade.SetExpertTakeProfit(200); // Set take profit level for trades
+    trade.SetExpertTradeVolume(0.1); // Set trade volume for trades
+
+    return(INIT_SUCCEEDED);
+}
+
+// Perform trading operations on each tick
+void OnTick()
+{
+    // Calculate MACD values
+    double macdMain = iMACD(Symbol(), 0, 12, 26, 9, PRICE_CLOSE, MODE_MAIN, 0);
+    double macdSignal = iMACD(Symbol(), 0, 12, 26, 9, PRICE_CLOSE, MODE_SIGNAL, 0);
+
+    // Check for Scalping Arrows feature
+    if (MathAbs(macdMain - macdSignal) > SCALPING_ARROW_THRESHOLD)
+    {
+        // Generate Scalping Arrow signal
+        trade.Buy(Symbol(), trade.GetExpertTradeVolume(), 0, 0, 0);
+    }
+
+    // Check for Reversal Arrows feature
+    if (MathAbs(macdMain - macdSignal) > REVERSAL_ARROW_THRESHOLD)
+    {
+        // Generate Reversal Arrow signal
+        trade.Sell(Symbol(), trade.GetExpertTradeVolume(), 0, 0, 0);
+    }
+}
+
+// Perform necessary cleanup operations
+void OnDeinit(const int reason)
+{
+    // Close any open trades
+    trade.CloseAll();
+
+    // Print a message indicating the end of the program
+    Print('RelicusRoad MACD v2 has stopped.');
+}
